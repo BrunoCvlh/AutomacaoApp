@@ -1,3 +1,4 @@
+# consolidation_logic.py
 import pandas as pd
 import os
 import datetime
@@ -34,8 +35,24 @@ def inclui_dados_na_base(consolidated_file_path, destination_sheet_path):
     try:
         df_consolidado = pd.read_excel(consolidated_file_path)
         
-        with pd.ExcelWriter(destination_sheet_path, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
-            df_consolidado.to_excel(writer, sheet_name='Dados Inseridos', index=False)
+        # Verificar se o arquivo de destino existe
+        if os.path.exists(destination_sheet_path):
+            # Se existe, carregar a planilha e anexar os novos dados
+            with pd.ExcelWriter(destination_sheet_path, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
+                # Carregar a planilha existente para obter a última linha
+                # Se a aba 'Dados Inseridos' não existe, ela será criada automaticamente
+                try:
+                    df_existente = pd.read_excel(destination_sheet_path, sheet_name='Dados Inseridos')
+                    # Anexar os novos dados, ignorando o cabeçalho para as linhas subsequentes
+                    df_consolidado.to_excel(writer, sheet_name='Dados Inseridos', index=False, 
+                                            startrow=len(df_existente) + 1, header=False)
+                except ValueError:
+                    # Se a aba 'Dados Inseridos' não existe no arquivo, escrevê-la com cabeçalho
+                    df_consolidado.to_excel(writer, sheet_name='Dados Inseridos', index=False, header=True)
+        else:
+            # Se o arquivo não existe, criar um novo com a aba 'Dados Inseridos'
+            with pd.ExcelWriter(destination_sheet_path, mode='w', engine='openpyxl') as writer:
+                df_consolidado.to_excel(writer, sheet_name='Dados Inseridos', index=False, header=True)
         
         print(f"Dados anexados à planilha existente: {destination_sheet_path}")
         return True
