@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog # Import filedialog
-import os # Import os for basename
+from tkinter import messagebox, filedialog
+import os
 
 class GoogleSheetScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -20,22 +20,21 @@ class GoogleSheetScreen(tk.Frame):
         self.btn_selecionar_consolidado = tk.Button(self.frame_arquivo_consolidado, text="Selecionar Arquivo Consolidado", command=self.selecionar_arquivo_consolidado)
         self.btn_selecionar_consolidado.pack(pady=5)
 
-        # Frame for the Google Sheet URL
-        self.frame_google_sheet = tk.LabelFrame(self, text="URL da Planilha Google (Base de Dados para Inclusão)", padx=10, pady=10)
-        self.frame_google_sheet.pack(pady=10, padx=10, fill="x")
+        # Frame for the Destination Spreadsheet
+        # O texto foi alterado para refletir o uso de planilhas locais
+        self.frame_planilha_destino = tk.LabelFrame(self, text="Planilha de Destino (Base de Dados para Inclusão)", padx=10, pady=10)
+        self.frame_planilha_destino.pack(pady=10, padx=10, fill="x")
 
-        self.label_google_sheet_url = tk.Label(self.frame_google_sheet, text="Nenhuma URL definida.", wraplength=400)
-        self.label_google_sheet_url.pack(pady=5)
+        self.label_planilha_destino_caminho = tk.Label(self.frame_planilha_destino, text="Nenhum caminho definido.", wraplength=400)
+        self.label_planilha_destino_caminho.pack(pady=5)
 
-        self.entry_google_sheet_url = tk.Entry(self.frame_google_sheet, width=60)
-        self.entry_google_sheet_url.pack(pady=5)
-        self.entry_google_sheet_url.bind("<Return>", self.definir_url_planilha_google_event)
+        # Botão para localizar a planilha manualmente
+        self.btn_localizar_planilha = tk.Button(self.frame_planilha_destino, text="Localizar Planilha de Destino", command=self.localizar_planilha_destino_manualmente)
+        self.btn_localizar_planilha.pack(pady=5)
 
-        self.btn_definir_url_google = tk.Button(self.frame_google_sheet, text="Definir URL da Planilha Google", command=self.definir_url_planilha_google)
-        self.btn_definir_url_google.pack(pady=5)
-
-        # Button to send data to Google Sheet
-        self.btn_incluir_na_base = tk.Button(self, text="Enviar Dados para a Planilha", command=self.incluir_dados_na_base,
+        # Button to send data to the spreadsheet
+        # O texto do botão foi ajustado
+        self.btn_incluir_na_base = tk.Button(self, text="Enviar Dados para a Planilha Local", command=self.incluir_dados_na_base,
                                              bg="#2196F3", fg="white", font=("Arial", 10, "bold"), relief="raised")
         self.btn_incluir_na_base.pack(pady=20)
 
@@ -45,7 +44,6 @@ class GoogleSheetScreen(tk.Frame):
                                      bg="#607D8B", fg="white", font=("Arial", 10, "bold"), relief="raised")
         self.btn_voltar.pack(pady=5)
 
-        # Status Label
         self.status_label = tk.Label(self, text="", fg="blue", font=("Arial", 9))
         self.status_label.pack(pady=5)
 
@@ -62,57 +60,72 @@ class GoogleSheetScreen(tk.Frame):
         else:
             self.status_label.config(text="Seleção de arquivo consolidado cancelada.", fg="red")
 
-    def definir_url_planilha_google(self):
-        url = self.entry_google_sheet_url.get().strip()
-        if url:
-            self.controller.url_planilha_google_base = url
-            self.label_google_sheet_url.config(text=f"URL definida: {url}")
-            self.status_label.config(text="URL da Planilha Google definida.", fg="blue")
+    def localizar_planilha_destino_manualmente(self):
+        """Abre uma caixa de diálogo para o usuário selecionar um arquivo de planilha,
+        e insere o caminho no campo de caminho da planilha de destino."""
+        file_path = filedialog.askopenfilename(
+            title="Selecione a Planilha de Destino",
+            filetypes=[("Arquivos Excel", "*.xlsx"), ("Arquivos CSV", "*.csv"), ("Todos os Arquivos", "*.*")]
+        )
+        if file_path:
+            self.label_planilha_destino_caminho.delete(0, tk.END)
+            self.label_planilha_destino_caminho.insert(0, file_path)
+            self.status_label.config(text=f"Caminho da planilha preenchido: {os.path.basename(file_path)}", fg="blue")
         else:
-            messagebox.showwarning("Atenção", "Por favor, insira uma URL válida para a Planilha Google.")
-            self.status_label.config(text="Nenhuma URL definida.", fg="red")
+            self.status_label.config(text="Seleção de planilha cancelada.", fg="red")
 
-    def definir_url_planilha_google_event(self, event):
-        self.definir_url_planilha_google()
+    def definir_caminho_planilha_destino(self):
+        """Define o caminho da planilha de destino a partir do campo de entrada."""
+        caminho = self.entry_planilha_destino_caminho.get().strip()
+        if caminho:
+            self.controller.caminho_planilha_base = caminho
+            self.label_planilha_destino_caminho.config(text=f"Caminho definido: {caminho}")
+            self.status_label.config(text="Caminho da Planilha de Destino definido.", fg="blue")
+        else:
+            messagebox.showwarning("Atenção", "Por favor, insira um caminho válido para a Planilha de Destino.")
+            self.status_label.config(text="Nenhum caminho definido.", fg="red")
+
+    def definir_caminho_planilha_destino_event(self, event):
+        self.definir_caminho_planilha_destino()
 
     def incluir_dados_na_base(self):
-        # Use the file path selected on THIS screen first
         file_to_send = self.caminho_arquivo_consolidado_selecionado
 
-        # If no file was selected on this screen, try to use the one from the controller (if consolidated previously)
         if not file_to_send and self.controller.caminho_arquivo3:
             file_to_send = self.controller.caminho_arquivo3
             self.status_label.config(text="Usando arquivo consolidado da tela anterior.", fg="blue")
-            self.label_arquivo_consolidado.config(text=os.path.basename(file_to_send)) # Update label for clarity
+            self.label_arquivo_consolidado.config(text=os.path.basename(file_to_send))
 
         if not file_to_send:
             messagebox.showwarning("Atenção", "Por favor, selecione o arquivo consolidado ou consolide os arquivos na tela anterior.")
             return
-        if not self.controller.url_planilha_google_base:
-            messagebox.showwarning("Atenção", "Por favor, defina a URL da Planilha Google para inclusão.")
+        
+        caminho_planilha_destino = self.controller.caminho_planilha_base
+
+        if not caminho_planilha_destino:
+            messagebox.showwarning("Atenção", "Por favor, defina o caminho da Planilha de Destino para inclusão.")
             return
 
-        self.status_label.config(text="Incluindo dados na Planilha Google...", fg="orange")
+        self.status_label.config(text="Incluindo dados na Planilha de Destino...", fg="orange")
         self.controller.update_idletasks()
 
         try:
-            from consolidation_logic import inclui_dados_na_base # Import here to avoid circular dependency if not already imported
+            from consolidation_logic import inclui_dados_na_base 
 
-            url_saida_base = inclui_dados_na_base(
-                file_to_send, # Use the determined file path
-                self.controller.url_planilha_google_base
+            resultado = inclui_dados_na_base(
+                file_to_send,
+                caminho_planilha_destino
             )
 
-            if url_saida_base:
-                self.status_label.config(text=f"Sucesso! Dados incluídos na Planilha Google: {url_saida_base}", fg="green")
-                messagebox.showinfo("Sucesso", f"Os dados consolidados foram incluídos na Planilha Google em:\n{url_saida_base}")
+            if resultado:
+                self.status_label.config(text=f"Sucesso! Dados incluídos na Planilha de Destino: {caminho_planilha_destino}", fg="green")
+                messagebox.showinfo("Sucesso", f"Os dados consolidados foram incluídos na Planilha de Destino em:\n{caminho_planilha_destino}")
             else:
-                self.status_label.config(text="Operação de inclusão na Planilha Google cancelada ou falhou.", fg="red")
+                self.status_label.config(text="Operação de inclusão na Planilha de Destino cancelada ou falhou.", fg="red")
 
         except FileNotFoundError as e:
-            self.status_label.config(text=f"Erro: Arquivo consolidado não encontrado - {e}", fg="red")
+            self.status_label.config(text=f"Erro: Arquivo não encontrado - {e}", fg="red")
             messagebox.showerror("Erro de Arquivo", str(e))
         except Exception as e:
-            self.status_label.config(text=f"Erro inesperado durante a inclusão na Planilha Google: {e}", fg="red")
+            self.status_label.config(text=f"Erro inesperado durante a inclusão na Planilha de Destino: {e}", fg="red")
             messagebox.showerror("Erro", f"Ocorreu um erro inesperado: {str(e)}")
-
