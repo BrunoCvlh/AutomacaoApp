@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 import os
 
-# Importa as classes das telas
 from consolidation_screen import ConsolidationScreen
 from google_sheet_screen import GoogleSheetScreen
 
@@ -18,7 +17,6 @@ class MainApp(tk.Tk):
         self.caminho_arquivo3 = None 
         self.caminho_planilha_base = None
 
-        # Container para as telas
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
         self.container.grid_rowconfigure(0, weight=1)
