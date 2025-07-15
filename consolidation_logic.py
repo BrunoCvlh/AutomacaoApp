@@ -12,17 +12,13 @@ def consolida_e_salva_excel(file1_path, file2_path, output_path, mes_competencia
 
     df_final = pd.concat([df_primeiro, df_segundo], ignore_index=True)
 
-    # Adiciona a coluna de hora de geração
     df_final['Hora da Geração'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Adiciona as colunas de mês e ano de competência, se fornecidos
     if mes_competencia is not None and ano_competencia is not None:
         try:
-            # Cria um objeto datetime para o primeiro dia do mês/ano de competência
             data_competencia = datetime.date(ano_competencia, mes_competencia, 1)
-            df_final['Data Competência'] = data_competencia.strftime("%d/%m/%Y") # Formata como "DD/MM/AAAA"
+            df_final['Data Competência'] = data_competencia.strftime("%d/%m/%Y")
         except ValueError:
-            # Caso a conversão falhe por algum motivo (ex: mês inválido), adiciona como None ou trata o erro
             df_final['Data Competência'] = None
 
     df_final.to_excel(output_path, index=False)

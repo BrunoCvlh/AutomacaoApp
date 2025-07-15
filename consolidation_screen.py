@@ -27,7 +27,6 @@ class ConsolidationScreen(tk.Frame):
         self.btn_selecionar2 = tk.Button(self.frame2, text="Selecionar Arquivo 2", command=self.selecionar_arquivo2)
         self.btn_selecionar2.pack(pady=5)
 
-        # Novo Frame para Mês e Ano de Competência
         self.frame_competencia = tk.LabelFrame(self, text="Mês e Ano de Competência", padx=10, pady=10)
         self.frame_competencia.pack(pady=10, padx=10, fill="x")
 
@@ -39,7 +38,6 @@ class ConsolidationScreen(tk.Frame):
         self.entry_ano = tk.Entry(self.frame_competencia, width=7)
         self.entry_ano.pack(side=tk.LEFT, padx=5)
         
-        # Preencher com mês e ano atuais como sugestão
         self.entry_mes.insert(0, datetime.datetime.now().strftime("%m"))
         self.entry_ano.insert(0, datetime.datetime.now().strftime("%Y"))
 
@@ -113,8 +111,8 @@ class ConsolidationScreen(tk.Frame):
                 self.controller.caminho_arquivo1,
                 self.controller.caminho_arquivo2,
                 self.controller.caminho_arquivo3,
-                mes_competencia=int(mes_competencia),  # Passa como int
-                ano_competencia=int(ano_competencia)    # Passa como int
+                mes_competencia=int(mes_competencia),
+                ano_competencia=int(ano_competencia) 
             )
 
             if caminho_saida:

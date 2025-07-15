@@ -13,12 +13,10 @@ class MainApp(tk.Tk):
         self.geometry("550x550")
         self.resizable(False, False)
 
-        # Variáveis para armazenar os caminhos dos arquivos e a URL da planilha
         self.caminho_arquivo1 = None
         self.caminho_arquivo2 = None
-        self.caminho_arquivo3 = None # Caminho para o arquivo consolidado (saída local)
-        # RENOMEADO: De 'url_planilha_google_base' para 'caminho_planilha_base'
-        self.caminho_planilha_base = None # Caminho para a planilha de destino local
+        self.caminho_arquivo3 = None 
+        self.caminho_planilha_base = None
 
         # Container para as telas
         self.container = tk.Frame(self)
@@ -27,7 +25,6 @@ class MainApp(tk.Tk):
         self.container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        # Inicializa as telas e as adiciona ao dicionário de frames
         for F in (ConsolidationScreen, GoogleSheetScreen):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
