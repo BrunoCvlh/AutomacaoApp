@@ -10,7 +10,7 @@ class MainApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Consolidar e Enviar Dados Excel")
-        self.geometry("550x450")
+        self.geometry("550x550")
         self.resizable(False, False)
 
         # Variáveis para armazenar os caminhos dos arquivos e a URL da planilha

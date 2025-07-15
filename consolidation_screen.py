@@ -27,6 +27,23 @@ class ConsolidationScreen(tk.Frame):
         self.btn_selecionar2 = tk.Button(self.frame2, text="Selecionar Arquivo 2", command=self.selecionar_arquivo2)
         self.btn_selecionar2.pack(pady=5)
 
+        # Novo Frame para Mês e Ano de Competência
+        self.frame_competencia = tk.LabelFrame(self, text="Mês e Ano de Competência", padx=10, pady=10)
+        self.frame_competencia.pack(pady=10, padx=10, fill="x")
+
+        tk.Label(self.frame_competencia, text="Mês (MM):").pack(side=tk.LEFT, padx=5)
+        self.entry_mes = tk.Entry(self.frame_competencia, width=5)
+        self.entry_mes.pack(side=tk.LEFT, padx=5)
+
+        tk.Label(self.frame_competencia, text="Ano (AAAA):").pack(side=tk.LEFT, padx=5)
+        self.entry_ano = tk.Entry(self.frame_competencia, width=7)
+        self.entry_ano.pack(side=tk.LEFT, padx=5)
+        
+        # Preencher com mês e ano atuais como sugestão
+        self.entry_mes.insert(0, datetime.datetime.now().strftime("%m"))
+        self.entry_ano.insert(0, datetime.datetime.now().strftime("%Y"))
+
+
         self.btn_consolidar = tk.Button(self, text="Consolidar Arquivos", command=self.consolidar_arquivos,
                                         bg="#4CAF50", fg="white", font=("Arial", 10, "bold"), relief="raised")
         self.btn_consolidar.pack(pady=20)
@@ -71,6 +88,16 @@ class ConsolidationScreen(tk.Frame):
             messagebox.showwarning("Atenção", "Por favor, selecione o segundo arquivo.")
             return
 
+        mes_competencia = self.entry_mes.get().strip()
+        ano_competencia = self.entry_ano.get().strip()
+
+        if not mes_competencia.isdigit() or not (1 <= int(mes_competencia) <= 12):
+            messagebox.showwarning("Atenção", "Por favor, insira um mês válido (MM).")
+            return
+        if not ano_competencia.isdigit() or len(ano_competencia) != 4:
+            messagebox.showwarning("Atenção", "Por favor, insira um ano válido (AAAA).")
+            return
+
         self.status_label.config(text="Processando arquivos para consolidação...", fg="orange")
         self.controller.update_idletasks()
 
@@ -85,7 +112,9 @@ class ConsolidationScreen(tk.Frame):
             caminho_saida = consolida_e_salva_excel(
                 self.controller.caminho_arquivo1,
                 self.controller.caminho_arquivo2,
-                self.controller.caminho_arquivo3
+                self.controller.caminho_arquivo3,
+                mes_competencia=int(mes_competencia),  # Passa como int
+                ano_competencia=int(ano_competencia)    # Passa como int
             )
 
             if caminho_saida:
