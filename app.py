@@ -17,7 +17,8 @@ class MainApp(tk.Tk):
         self.caminho_arquivo1 = None
         self.caminho_arquivo2 = None
         self.caminho_arquivo3 = None # Caminho para o arquivo consolidado (saída local)
-        self.url_planilha_google_base = None # URL da planilha Google
+        # RENOMEADO: De 'url_planilha_google_base' para 'caminho_planilha_base'
+        self.caminho_planilha_base = None # Caminho para a planilha de destino local
 
         # Container para as telas
         self.container = tk.Frame(self)

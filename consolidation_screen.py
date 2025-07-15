@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import os
-import datetime # Importa datetime para gerar nomes de arquivo únicos
+import datetime
 from consolidation_logic import consolida_e_salva_excel
 
 class ConsolidationScreen(tk.Frame):
@@ -9,7 +9,6 @@ class ConsolidationScreen(tk.Frame):
         super().__init__(parent)
         self.controller = controller
 
-        # Frame for the first file
         self.frame1 = tk.LabelFrame(self, text="Primeiro Arquivo (Base do Relatório Operacional)", padx=10, pady=10)
         self.frame1.pack(pady=10, padx=10, fill="x")
 
@@ -19,7 +18,6 @@ class ConsolidationScreen(tk.Frame):
         self.btn_selecionar1 = tk.Button(self.frame1, text="Selecionar Arquivo 1", command=self.selecionar_arquivo1)
         self.btn_selecionar1.pack(pady=5)
 
-        # Frame for the second file
         self.frame2 = tk.LabelFrame(self, text="Segundo Arquivo (Receitas e Despesas Previdenciárias)", padx=10, pady=10)
         self.frame2.pack(pady=10, padx=10, fill="x")
 
@@ -29,45 +27,41 @@ class ConsolidationScreen(tk.Frame):
         self.btn_selecionar2 = tk.Button(self.frame2, text="Selecionar Arquivo 2", command=self.selecionar_arquivo2)
         self.btn_selecionar2.pack(pady=5)
 
-        # Removed the frame for manually defining the consolidated output file,
-        # as it will now be automatically saved to Downloads.
-
-        # Consolidate and Save Button
-        self.btn_consolidar = tk.Button(self, text="Consolidar e Salvar em Downloads", command=self.consolidar_arquivos,
-                                         bg="#4CAF50", fg="white", font=("Arial", 10, "bold"), relief="raised")
+        self.btn_consolidar = tk.Button(self, text="Consolidar Arquivos", command=self.consolidar_arquivos,
+                                        bg="#4CAF50", fg="white", font=("Arial", 10, "bold"), relief="raised")
         self.btn_consolidar.pack(pady=20)
 
-        # Button to go to Google Sheet screen
-        self.btn_ir_para_google_sheet = tk.Button(self, text="Enviar Dados para Planilha Google",
+        self.btn_ir_para_google_sheet = tk.Button(self, text="Ir para Envio de Dados",
                                                   command=lambda: self.controller.show_frame("GoogleSheetScreen"),
-                                                  bg="#2196F3", fg="white", font=("Arial", 10, "bold"), relief="raised")
+                                                  bg="#007BFF", fg="white", font=("Arial", 10, "bold"), relief="raised")
         self.btn_ir_para_google_sheet.pack(pady=5)
 
-        # Status Label
         self.status_label = tk.Label(self, text="", fg="blue", font=("Arial", 9))
         self.status_label.pack(pady=5)
 
     def selecionar_arquivo1(self):
         file_path = filedialog.askopenfilename(
-            title="Selecione o Primeiro Arquivo Excel",
+            title="Selecione o Primeiro Arquivo",
             filetypes=[("Arquivos Excel", "*.xlsx")]
         )
         if file_path:
             self.controller.caminho_arquivo1 = file_path
             self.label1.config(text=os.path.basename(file_path))
-            self.status_label.config(text="Arquivo 1 selecionado.", fg="blue")
+            self.status_label.config(text="Primeiro arquivo selecionado.", fg="blue")
+        else:
+            self.status_label.config(text="Seleção do primeiro arquivo cancelada.", fg="red")
 
     def selecionar_arquivo2(self):
         file_path = filedialog.askopenfilename(
-            title="Selecione o Segundo Arquivo Excel",
+            title="Selecione o Segundo Arquivo",
             filetypes=[("Arquivos Excel", "*.xlsx")]
         )
         if file_path:
             self.controller.caminho_arquivo2 = file_path
             self.label2.config(text=os.path.basename(file_path))
-            self.status_label.config(text="Arquivo 2 selecionado.", fg="blue")
-
-    # Removed selecionar_arquivo3 as the path will be automatically determined
+            self.status_label.config(text="Segundo arquivo selecionado.", fg="blue")
+        else:
+            self.status_label.config(text="Seleção do segundo arquivo cancelada.", fg="red")
 
     def consolidar_arquivos(self):
         if not self.controller.caminho_arquivo1:
@@ -81,25 +75,22 @@ class ConsolidationScreen(tk.Frame):
         self.controller.update_idletasks()
 
         try:
-            # Automatically determine the path to the Downloads folder
             downloads_path = os.path.expanduser('~/Downloads')
-            
-            # Generate a unique filename using a timestamp
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             output_filename = f"consolidado_automatico_{timestamp}.xlsx"
             
-            # Construct the full output path
-            self.controller.caminho_arquivo3 = os.path.join(downloads_path, output_filename)
+            full_output_path = os.path.join(downloads_path, output_filename)
+            self.controller.caminho_arquivo3 = full_output_path 
 
             caminho_saida = consolida_e_salva_excel(
                 self.controller.caminho_arquivo1,
                 self.controller.caminho_arquivo2,
+                self.controller.caminho_arquivo3
             )
 
             if caminho_saida:
-                self.status_label.config(text=f"Salvo em: {caminho_saida}", fg="green")
+                self.status_label.config(text=f"Salvo!", fg="green")
             else:
-                # This case should ideally not be reached if consolida_e_salva_excel always returns a path on success
                 self.status_label.config(text="Operação de salvamento cancelada ou falhou.", fg="red")
 
         except FileNotFoundError as e:
@@ -111,4 +102,3 @@ class ConsolidationScreen(tk.Frame):
         except Exception as e:
             self.status_label.config(text=f"Erro inesperado durante a consolidação: {e}", fg="red")
             messagebox.showerror("Erro", f"Ocorreu um erro inesperado: {str(e)}")
-
